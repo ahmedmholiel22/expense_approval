@@ -19,6 +19,7 @@
         'security/ir.model.access.csv',
         # 'report/',
         'wizard/register_payment_wizard_view.xml',
+        'wizard/over_budget_wizard.xml',
         'views/department_view.xml',
         'views/expense_item_view.xml',
         'views/approval_budget.xml',

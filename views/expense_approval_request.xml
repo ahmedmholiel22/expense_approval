@@ -61,6 +61,8 @@
                             <field string="Journal Entry" name="journal_entry_count" widget="statinfo"/>
                         </button>
                     </div>
+                    <widget name="web_ribbon" title="Over Budget" bg_color="bg-danger" attrs="{'invisible': [('is_over_budget', '=', False)]}"/>
+                    <widget name="web_ribbon" title="In Budget" bg_color="bg-success" attrs="{'invisible': [('is_in_budget', '=', False)]}"/>
                     <group>
                         <group>
                             <field name="name" readonly="1"/>
@@ -98,6 +100,9 @@
                             <field name="can_approve_store" invisible="1"/>
                             <field name="has_approved_before" invisible="1"/>
                             <field name="has_approved_before_stored" invisible="1"/>
+                            <field name="is_over_budget" invisible="1"/>
+                            <field name="is_in_budget" invisible="1"/>
+                            <field name="over_budget_comment" invisible="0"/>
                         </group>
                     </group>
                     <notebook>

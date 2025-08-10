@@ -151,6 +151,31 @@ class ExpenseApprovalRequest(models.Model):
         compute='_compute_has_approved_before'
     )
     has_approved_before_stored = fields.Boolean()
+    is_over_budget = fields.Boolean(
+        compute='compute_is_over_budget',
+        store=True
+    )
+    is_in_budget = fields.Boolean(
+        compute='compute_is_in_budget',
+        store=True
+    )
+    over_budget_comment = fields.Text()
+
+    @api.depends('amount','remaining_amount','budget_line_id')
+    def compute_is_over_budget(self):
+        for rec in self:
+            if rec.budget_line_id and rec.amount > 0 and rec.amount > rec.remaining_amount:
+                rec.is_over_budget = True
+            else:
+                rec.is_over_budget = False
+
+    @api.depends('amount','remaining_amount','budget_line_id')
+    def compute_is_in_budget(self):
+        for rec in self:
+            if rec.budget_line_id and rec.amount > 0 and rec.amount < rec.remaining_amount:
+                rec.is_in_budget = True
+            else:
+                rec.is_in_budget = False
 
     def _compute_has_approved_before(self):
         current_user = self.env.user
@@ -308,13 +333,19 @@ class ExpenseApprovalRequest(models.Model):
 
         if activity_type:
             for rec in self:
+                note = ''
+                if rec.is_over_budget:
+                    note = rec.over_budget_comment
+                else:
+                    note = 'يرجى مراجعة الطلب واتخاذ القرار.'
+
                 self.env['mail.activity'].create({
                     'res_model_id': self.env['ir.model']._get_id('expense.approval.request'),
                     'res_id': rec.id,
                     'activity_type_id': activity_type.id,
                     'summary': 'مطلوب الموافقة على طلب التعميد',
                     'user_id': user_id.id,
-                    'note': 'يرجى مراجعة الطلب واتخاذ القرار.',
+                    'note': note,
                 })
 
     def generate_approval_lines(self):
@@ -322,15 +353,34 @@ class ExpenseApprovalRequest(models.Model):
             rec.approval_line_ids.unlink()
             main_item = rec.main_item_id
             levels = main_item.approval_level_ids.filtered(lambda l: l.is_approved)
-            lines = []
-            for level in levels.sorted(key=lambda l: l.sequence):
-                lines.append((0, 0, {
-                    'user_id': level.user_id.id,
-                    'sequence': level.sequence,
-                    'level_name': level.level_name,
-                    'state': 'pending'
-                }))
-            rec.approval_line_ids = lines
+            if levels:
+                lines = []
+                for level in levels.sorted(key=lambda l: l.sequence):
+                    lines.append((0, 0, {
+                        'user_id': level.user_id.id,
+                        'sequence': level.sequence,
+                        'level_name': level.level_name,
+                        'state': 'pending'
+                    }))
+                rec.approval_line_ids = lines
+            else:
+                raise ValidationError(_("please enter approval level for expense"))
+
+    @api.onchange('amount')
+    def _onchange_amount_warning(self):
+        for rec in self:
+            if rec.amount and rec.remaining_amount and rec.amount > rec.remaining_amount:
+                return {
+                    'warning': {
+                        'title': "Warning",
+                        'message': "This request is over budget",
+                    }
+                }
+    # @api.constrains('amount')
+    # def _check_amount_not_exceed_remaining(self):
+    #     for rec in self:
+    #         if rec.amount and rec.remaining_amount and rec.amount > rec.remaining_amount:
+    #             raise ValidationError("This request is over budget")
 
     def remove_activity(self, user_id):
         """Remove pending approval activities for the given user."""
@@ -366,11 +416,24 @@ class ExpenseApprovalRequest(models.Model):
     def action_submit(self):
         for rec in self:
             rec.generate_approval_lines()
-            first_line = self.approval_line_ids[0]
-            if first_line.user_id:
-                self.create_approval_activity(first_line.user_id)
-                # self.send_approval_email(first_line.user_id, rec.name)
-            rec.state = 'in_progress'
+            if rec.amount > rec.remaining_amount:
+                    return {
+                        'type': 'ir.actions.act_window',
+                        'name': 'Over Budget',
+                        'res_model': 'over.budget.wizard',
+                        'view_mode': 'form',
+                        'view_type': 'form',
+                        'target': 'new',
+                        'context': {
+                            'default_request_id': self.id,
+                        },
+                    }
+            else:
+                first_line = self.approval_line_ids[0]
+                if first_line.user_id:
+                    self.create_approval_activity(first_line.user_id)
+                    # self.send_approval_email(first_line.user_id, rec.name)
+                rec.state = 'in_progress'
 
     def action_set_to_draft(self):
         for rec in self:
