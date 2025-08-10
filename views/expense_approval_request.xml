@@ -39,7 +39,7 @@
                             groups="expense_approval.group_account_expense_approval"/>
 
 
-                    <field name="state" widget="statusbar" options="{'clickable': '1'}"/>
+                    <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
@@ -102,7 +102,7 @@
                             <field name="has_approved_before_stored" invisible="1"/>
                             <field name="is_over_budget" invisible="1"/>
                             <field name="is_in_budget" invisible="1"/>
-                            <field name="over_budget_comment" invisible="0"/>
+                            <field name="over_budget_comment" invisible="1"/>
                         </group>
                     </group>
                     <notebook>
@@ -114,12 +114,12 @@
                                     <field name="user_id" readonly="1"/>
                                     <field name="state" readonly="1"/>
                                     <field name="approval_date" readonly="1"/>
-                                    <field name="comment"/>
+                                    <field name="comment" attrs="{'readonly': [('parent.state', 'not in', ['draft','in_progress'])]}"/>
                                 </tree>
                             </field>
                         </page>
                         <page string="Products">
-                            <field name="product_line_ids">
+                            <field name="product_line_ids" attrs="{'readonly': [('state', '!=', 'draft')]}">
                                 <tree editable="bottom">
                                     <field name="product_id"
                                            attrs="{'invisible': [('parent.has_product', '=', False)],'required': [('parent.has_product', '=', True)]}"
