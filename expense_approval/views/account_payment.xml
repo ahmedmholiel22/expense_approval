@@ -1,0 +1,14 @@
+<odoo>
+    <record id="view_account_payment_form_inherit_expense" model="ir.ui.view">
+        <field name="name">account.payment.form.inherit.expense</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='communication']" position="after">
+                <field name="expense_request_id" invisible="1"/>
+                <field name="expense_request_ref" attrs="{'invisible': [('expense_request_id', '=', False)]}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

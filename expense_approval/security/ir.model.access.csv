@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_expense_approval_department_user,access_expense_approval_department_user,model_expense_approval_department,,1,1,1,1
+access_expense_approval_main_item_user,access_expense_approval_main_item_user,model_expense_approval_main_item,,1,1,1,1
+access_expense_approval_sub_item_user,access_expense_approval_sub_item_user,model_expense_approval_sub_item,,1,1,1,1
+access_budget,access_expense_approval_budget,model_expense_approval_budget,,1,1,1,1
+access_expense_approval_request,access_expense_approval_request,model_expense_approval_request,,1,1,1,1
+access_expense_approval_level,access_expense_approval_level,model_expense_approval_level,,1,1,1,1
+access_expense_approval_line,access_expense_approval_line,model_expense_approval_line,,1,1,1,1
+access_expense_product_line,access_expense_product_line,model_expense_product_line,,1,1,1,1

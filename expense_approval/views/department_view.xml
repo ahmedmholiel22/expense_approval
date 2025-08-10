@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_tree_expense_approval_department" model="ir.ui.view">
+        <field name="name">expense.approval.department.tree</field>
+        <field name="model">expense.approval.department</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom" string="Departments">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_form_expense_approval_department" model="ir.ui.view">
+        <field name="name">expense.approval.department.form</field>
+        <field name="model">expense.approval.department</field>
+        <field name="arch" type="xml">
+            <form string="Department">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_expense_approval_department" model="ir.actions.act_window">
+        <field name="name">Departments</field>
+        <field name="res_model">expense.approval.department</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+
+
+
+    <menuitem id="menu_expense_approval"
+              name="Expense Approvals"
+    />
+
+    <menuitem id="menu_expense_approval_settings"
+              name="Settings"
+              parent="expense_approval.menu_expense_approval"
+    />
+    <menuitem id="menu_expense_approval_department"
+              name="Departments"
+              parent="expense_approval.menu_expense_approval_settings"
+              action="action_expense_approval_department"
+    />
+</odoo>
